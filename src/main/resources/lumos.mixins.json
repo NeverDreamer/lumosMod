@@ -1,0 +1,16 @@
+
+{
+  "required": true,
+  "package": "com.Meli4.lumos.common.forge.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "lumos.refmap.json",
+  "mixins": [
+    "MixinManaItemHandlerImpl",
+    "MixinMyrmexHive",
+    "MixinPiglinTasks"
+  ],
+  "client": [
+    "PotionEntityMixin"
+  ],
+  "minVersion": "0.8"
+}
