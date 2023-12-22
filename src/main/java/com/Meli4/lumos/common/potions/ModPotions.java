@@ -17,4 +17,7 @@ public class ModPotions {
             CrystallizedEffect::new);
     public static final RegistryObject<Effect> DEATH_MARK = POTIONS.register("death_mark",
             DeathMarkEffect::new);
+
+    public static final RegistryObject<Effect> SOUL_WITHERING = POTIONS.register("soul_withering",
+            SoulWitheringEffect::new);
 }

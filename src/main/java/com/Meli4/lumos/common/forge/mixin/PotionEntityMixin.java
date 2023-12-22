@@ -24,7 +24,7 @@ public class PotionEntityMixin {
 
 
     @Inject(method = "applyWater", at=@At(value = "HEAD"))
-    private void lumos_onWaterApply(CallbackInfo ci){
+    public void lumos_onWaterApply(CallbackInfo ci){
         AxisAlignedBB axisalignedbb = ((PotionEntity)(Object)this).getBoundingBox().grow(4.0D, 2.0D, 4.0D);
         List<LivingEntity> list = ((PotionEntity)(Object)this).world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
         if (!list.isEmpty()) {
