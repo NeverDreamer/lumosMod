@@ -60,7 +60,7 @@ public class BonusCapabilityEvent {
                     }*/
                 //}
                 IBonus bonus = (IBonus) BonusCapability.getBonus(event.player).orElse((IBonus) null);
-                if(bonus != null){
+                if(bonus != null && player.world.getGameTime()%10==0){
                     bonus.setCooldown(bonus.getCooldown()-1);
                     bonus.setDuration(bonus.getDuration()-1);
                     if(SetBonus.getType(player) == null){

@@ -29,6 +29,9 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.reflections.Reflections;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import software.bernie.shadowed.eliotlash.mclib.math.functions.classic.Abs;
 
 import java.util.stream.Collectors;
@@ -41,10 +44,12 @@ public class LumosMod
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static final String MOD_ID = "lumos";
+    public static Reflections reflections = null;
 
     public LumosMod() {
 
-
+        reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forPackage("com.Meli4.lumos.common.event.bonuses")));
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -65,6 +70,7 @@ public class LumosMod
     private void setup(final FMLCommonSetupEvent event)
     {
         // some preinit code
+
         BonusCapability.register();
         LumosNetwork.init();
     }

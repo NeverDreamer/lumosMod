@@ -109,6 +109,10 @@ public class PurpleGeodeSet extends PressSetBonus {
 
                     }
                 }
+            }else{
+                if(player.getAttribute(Attributes.MOVEMENT_SPEED).getModifier(UUID.fromString(uuid)) != null){
+                    INSTANCE.removeAttributesModifiersFromEntity(player);
+                }
             }
         }
     }

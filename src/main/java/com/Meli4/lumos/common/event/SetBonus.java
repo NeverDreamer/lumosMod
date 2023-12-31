@@ -1,5 +1,7 @@
 package com.Meli4.lumos.common.event;
 
+import com.Meli4.lumos.LumosMod;
+import com.Meli4.lumos.common.event.bonuses.ManaSteelSet;
 import com.google.common.reflect.ClassPath;
 import com.meteor.extrabotany.common.items.armor.shadowwarrior.ItemShadowWarriorArmor;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,6 +41,8 @@ public abstract class SetBonus {
 
     public Class<? extends ArmorItem> getArmorClass(){return null;}
 
+    public Class<? extends ArmorItem> getHelmClass(){return null;}
+
     public String getMaterialName(){return null;}
 
     public IArmorMaterial getMaterial(){return null;}
@@ -64,10 +68,9 @@ public abstract class SetBonus {
             return new DeathSet();
         }
         return null;*/
-        Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage("com.Meli4.lumos.common.event.bonuses")));
 
-        Set<Class<? extends SetBonus>> classes = reflections.getSubTypesOf(SetBonus.class);
+
+        Set<Class<? extends SetBonus>> classes = LumosMod.reflections.getSubTypesOf(SetBonus.class);
         for(Class<? extends SetBonus> clas: classes){
             try {
                 if(hasArmor(player, clas.newInstance())){
@@ -88,13 +91,14 @@ public abstract class SetBonus {
         int count = 0;
         for(ItemStack itemstack : player.getArmorInventoryList()){
             if(itemstack.getItem() instanceof ArmorItem){
-                if(itemstack.getItem().getClass().equals(setBonus.getArmorClass())){
+                if(itemstack.getItem().getClass().equals(setBonus.getArmorClass()) || itemstack.getItem().getClass().equals(setBonus.getHelmClass())){
                     count++;
                 }
 
                 else if(((ArmorItem) itemstack.getItem()).getArmorMaterial() != null){
                     if(setBonus.getMaterialName() != null){
-                        if(((ArmorItem) itemstack.getItem()).getArmorMaterial().getName().startsWith(setBonus.getMaterialName())){
+                        //endswith just because the abyss exists
+                        if(((ArmorItem) itemstack.getItem()).getArmorMaterial().getName().startsWith(setBonus.getMaterialName()) || ((ArmorItem) itemstack.getItem()).getArmorMaterial().getName().endsWith(setBonus.getMaterialName())){
                             count++;
                         }
                     }
@@ -106,7 +110,6 @@ public abstract class SetBonus {
 
             }
         }
-
         return count == setBonus.getCount();
     }
 

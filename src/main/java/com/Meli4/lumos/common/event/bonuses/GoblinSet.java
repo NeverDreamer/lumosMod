@@ -1,5 +1,7 @@
 package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
 import com.Meli4.lumos.common.event.PressSetBonus;
 import com.Meli4.lumos.common.event.SetBonus;
 import com.meteor.extrabotany.common.items.armor.goblinslayer.ItemGoblinSlayerArmor;
@@ -49,9 +51,9 @@ public class GoblinSet extends PressSetBonus {
     public static void onDamaged(LivingHurtEvent event){
         if(event.getEntity() instanceof PlayerEntity){
             PlayerEntity player = (PlayerEntity) event.getEntity();
-            //LogManager.getLogger().info((player.getPersistentData().getInt("lumosSetBonus") > 0));
+            IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
             //LogManager.getLogger().info(new Random().nextFloat());
-            if((player.getPersistentData().getInt("lumosSetBonus") > 0) && SetBonus.hasArmor(player, INSTANCE) && new Random().nextFloat() < 0.25){
+            if((bonus.getDuration() > 0) && SetBonus.hasArmor(player, INSTANCE) && new Random().nextFloat() < 0.25){
                 event.setCanceled(true);
                 if(((PlayerEntity) event.getEntity()).hurtTime == 20){
                     player.hurtTime = 0;
@@ -89,7 +91,7 @@ public class GoblinSet extends PressSetBonus {
 
         if(event.getSource().getTrueSource() instanceof PlayerEntity){
             PlayerEntity attacker = (PlayerEntity) event.getSource().getTrueSource();
-            if(SetBonus.hasArmor((PlayerEntity) attacker, INSTANCE)){
+            if(SetBonus.hasArmor(attacker, INSTANCE)){
                 if(attacker.getActivePotionEffect(Effects.STRENGTH) != null){
                     event.setAmount(Math.max(0, event.getAmount() - (6*(attacker.getActivePotionEffect(Effects.STRENGTH).getAmplifier()+1))));
                 }

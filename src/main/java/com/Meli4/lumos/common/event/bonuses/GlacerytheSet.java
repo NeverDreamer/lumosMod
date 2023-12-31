@@ -8,19 +8,17 @@ import net.minecraft.item.ArmorItem;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraftforge.event.TickEvent;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.yezon.theabyss.potion.FlyingPotionEffect;
+import org.apache.logging.log4j.LogManager;
 
 @Mod.EventBusSubscriber
-public class DiamondSet extends ToggleSetBonus {
-    public DiamondSet(){};
+public class GlacerytheSet extends ToggleSetBonus {
+    public GlacerytheSet(){};
 
     @Override
     public void doActiveSkill(PlayerEntity player) {
@@ -34,9 +32,10 @@ public class DiamondSet extends ToggleSetBonus {
 
     public static SetBonus getInstance(){return INSTANCE;}
 
-    public String getMaterialName(){return "diamond";}
+    public String getMaterialName(){return "glacerythe_armor";}
 
-    public static DiamondSet INSTANCE = new DiamondSet();
+
+    public static GlacerytheSet INSTANCE = new GlacerytheSet();
 
     @SubscribeEvent
     public static void onActiveTick(TickEvent.PlayerTickEvent event) {
@@ -50,8 +49,7 @@ public class DiamondSet extends ToggleSetBonus {
                 if(player.isInWater()){
                     if (bonus.getMode()) {
                         if (!event.player.world.isRemote) {
-                            //player.addPotionEffect(new EffectInstance(new FlyingPotionEffect.EffectCustom(), 20, 0));
-                            player.addPotionEffect(new EffectInstance(Effects.HUNGER, 20, 0));
+                            player.addPotionEffect(new EffectInstance(new FlyingPotionEffect.EffectCustom(), 20, 0));
                         }
                     }
                 }
@@ -80,7 +78,7 @@ public class DiamondSet extends ToggleSetBonus {
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ArmorItem){
-            if(((ArmorItem) event.getItemStack().getItem()).getArmorMaterial().getName().startsWith("diamond")){
+            if(((ArmorItem) event.getItemStack().getItem()).getArmorMaterial().getName().startsWith("glacerythe_armor") || ((ArmorItem) event.getItemStack().getItem()).getArmorMaterial().getName().endsWith("glacerythe_armor")){
                 event.getToolTip().add(new StringTextComponent("lol1"));
                 event.getToolTip().add(new StringTextComponent("lol2"));
             }

@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.fml.network.PacketDistributor;
 
+//class that should be inherited by set bonuses that provide toggle active skill mechanic (how original)
 public abstract class ToggleSetBonus extends ActiveSetBonus {
 
     public abstract int getCooldown();

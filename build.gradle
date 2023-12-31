@@ -137,6 +137,7 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     implementation 'org.reflections:reflections:0.10.2'
+    implementation group: 'org.apache.commons', name: 'commons-vfs2', version: '2.0'
 
     implementation fg.deobf("curse.maven:blood-magic-224791:3870899")
     implementation fg.deobf("curse.maven:ars-omega-597007:3923720")
