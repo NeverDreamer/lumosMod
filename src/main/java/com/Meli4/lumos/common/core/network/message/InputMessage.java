@@ -1,6 +1,9 @@
 package com.Meli4.lumos.common.core.network.message;
 
-import com.Meli4.lumos.common.event.DeathSet;
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
+import com.Meli4.lumos.common.event.ActiveSetBonus;
+import com.Meli4.lumos.common.event.bonuses.DeathSet;
 import com.Meli4.lumos.common.event.SetBonus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -36,15 +39,14 @@ public class InputMessage {
             if(message.index == 0){
                 ServerPlayerEntity player = context.getSender();
                 if (player != null ) {
-                    if(SetBonus.getType(player) instanceof DeathSet){
-                        SetBonus.getType(player).doActiveSkill(player);
-                    }
-                    else if(player.getPersistentData().getInt("lumosSetBonusCD") == 0){
-                        if(SetBonus.getType(player) != null){
-                            SetBonus.getType(player).doActiveSkill(player);
+                    IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+                    if(bonus!=null){
+                        if(bonus.getCooldown()==0){
+                            if(SetBonus.getType(player) instanceof ActiveSetBonus){
+                                ((ActiveSetBonus) SetBonus.getType(player)).doActiveSkill(player);
+                            }
                         }
                     }
-
                 }
             }
             if(message.index == 1){

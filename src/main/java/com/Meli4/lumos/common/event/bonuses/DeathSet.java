@@ -1,67 +1,45 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
-import com.Meli4.lumos.common.core.network.message.InputMessage;
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.ToggleSetBonus;
 import com.Meli4.lumos.common.potions.ModPotions;
-import com.github.alexthe666.iceandfire.item.ItemDeathwormArmor;
-import com.github.alexthe666.iceandfire.item.ItemTrollArmor;
-import com.ma.ManaAndArtifice;
-import com.ma.Registries;
 import com.ma.api.sound.SFX;
-import com.ma.effects.EffectInit;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.sammy.malum.common.events.SpiritHandlingEvents;
 import com.sammy.malum.common.items.tools.spirittools.ScytheItem;
 import elucent.eidolon.Registry;
-import javafx.scene.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.PacketDistributor;
-import org.apache.logging.log4j.LogManager;
 import quek.undergarden.registry.UGSoundEvents;
-import shadows.apotheosis.ApotheosisObjects;
-
-import java.util.Random;
-
-import static com.Meli4.lumos.common.core.network.LumosNetwork.CHANNEL;
 
 @Mod.EventBusSubscriber
-public class DeathSet extends SetBonus {
-    public String desc1;
-    public String desc2;
+public class DeathSet extends ToggleSetBonus {
 
-    private static String nbtName = "deathSetMode";
 
     private static float fogAmount = 0.0F;
     private static float fogDecay = 0.01F;
@@ -70,37 +48,29 @@ public class DeathSet extends SetBonus {
 
     public DeathSet(){}
 
-    public DeathSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
-    public static DeathSet INSTANCE = new DeathSet("lol1", "lol2");
+    public static DeathSet INSTANCE = new DeathSet();
 
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
+    public static SetBonus getInstance(){return INSTANCE;}
 
-            if(itemstack.getItem() instanceof ArmorItem){
-                if(((ArmorItem) itemstack.getItem()).getArmorMaterial().getName().equals("forbidden_arcanus:mortem")){
-                    count++;
-                }
-            }
-        }
-        return count == 4;
-    }
+    public String getMaterialName(){return "forbidden_arcanus:mortem";}
 
     @Override
     public void doActiveSkill(PlayerEntity player) {
-        CompoundNBT nbt = player.getPersistentData();
+        IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+        if(bonus==null){return;}
 
-        if(getMode(player)){
+        if(bonus.getMode()){
             player.addPotionEffect(new EffectInstance(Registry.CHILLED_EFFECT.get(), 1200, 0));
             player.addPotionEffect(new EffectInstance(Effects.WEAKNESS, 1200, 4));
             player.addPotionEffect(new EffectInstance(Effects.NAUSEA, 1200, 0));
             toggleMode(player);
         }
-        else if(nbt.getInt("lumosSetBonusCD") <= 0){
+        else{
+            player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SFX.Event.Ritual.IRON_BELL, SoundCategory.PLAYERS, 1, 1);
+            player.addPotionEffect(new EffectInstance(ModPotions.SOUL_WITHERING.get(), 279, 0));
+            toggleMode(player);
+        }
+        /*else if(nbt.getInt("lumosSetBonusCD") <= 0){
             if(!getMode(player)){
                 player.getPersistentData().remove("lumosSetBonus");
                 player.getPersistentData().remove("lumosSetBonusCD");
@@ -114,7 +84,7 @@ public class DeathSet extends SetBonus {
                 toggleMode(player);
             }
 
-        }
+        }*/
 
 
 
@@ -124,7 +94,9 @@ public class DeathSet extends SetBonus {
     public static void onLivingKill(LivingDeathEvent event){
         if(!(event.getSource().getTrueSource() instanceof PlayerEntity)){return;}
         PlayerEntity player = (PlayerEntity) event.getSource().getTrueSource();
-        if(!INSTANCE.hasArmor(player) || !getMode(player)){return;}
+        IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+        if(bonus==null){return;}
+        if(!SetBonus.hasArmor(player, INSTANCE) || !bonus.getMode()){return;}
         SpiritHandlingEvents.onEntityKill(event);
     }
 
@@ -132,7 +104,9 @@ public class DeathSet extends SetBonus {
     public static void onLivingHurt(LivingHurtEvent event){
         if(!(event.getEntityLiving() instanceof PlayerEntity)){return;}
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-        if(!INSTANCE.hasArmor(player) || !getMode(player)){return;}
+        IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+        if(bonus==null){return;}
+        if(!SetBonus.hasArmor(player, INSTANCE) || !bonus.getMode()){return;}
 
         event.setAmount(event.getAmount()*1.35f);
     }
@@ -143,10 +117,12 @@ public class DeathSet extends SetBonus {
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.START)
         {
             PlayerEntity player = event.player;
-            if(INSTANCE.hasArmor(player)){
+            IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+            if(SetBonus.hasArmor(player, INSTANCE)){
                 if (!event.player.world.isRemote)
                 {
-                    if(!getMode(player)){
+                    if(bonus==null){return;}
+                    if(!bonus.getMode()){
                         player.addPotionEffect(new EffectInstance(ModPotions.DEATH_MARK.get(), 10, 0));
                         if(player.getActivePotionEffect(ModPotions.SOUL_WITHERING.get()) != null){
                             player.removePotionEffect(ModPotions.SOUL_WITHERING.get());
@@ -175,13 +151,17 @@ public class DeathSet extends SetBonus {
             ClientPlayerEntity player = Minecraft.getInstance().player;
             if (player != null) {
                 AxisAlignedBB aabb = new AxisAlignedBB(player.getPosition()).grow(10,10,10);
+                IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+
                 World world = Minecraft.getInstance().world;
-                if (INSTANCE.hasArmor(player) && player.getActivePotionEffect(ModPotions.DEATH_MARK.get()) == null) {
-                    fogAmount = 0.8F;
+                if(bonus!=null){
+                    if (SetBonus.hasArmor(player, INSTANCE) && bonus.getMode()) {
+                        fogAmount = 0.8F;
+                    }
                 } else if(!world.getEntitiesWithinAABB(LivingEntity.class, aabb).isEmpty()){
                     for(LivingEntity livingEntity: world.getEntitiesWithinAABB(LivingEntity.class, aabb)){
                         if(livingEntity instanceof PlayerEntity){
-                            if (INSTANCE.hasArmor((PlayerEntity) livingEntity)) {
+                            if (SetBonus.hasArmor((PlayerEntity) livingEntity, INSTANCE)) {
                                 if(livingEntity.getActivePotionEffect(ModPotions.DEATH_MARK.get()) == null){
                                     fogAmount = 0.8F;
                                 }
@@ -196,9 +176,6 @@ public class DeathSet extends SetBonus {
                 if (fogAmount > 0.0F) {
                     fogAmount -= fogDecay;
                 }
-                if(takeOffTimer > 0){
-                    takeOffTimer-=1;
-                }
 
             }
         }
@@ -208,7 +185,9 @@ public class DeathSet extends SetBonus {
     public static void onAttackEntity(AttackEntityEvent event){
         if(!(event.getEntityLiving() instanceof PlayerEntity)){return;}
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-        if(!getMode(player) || !INSTANCE.hasArmor(player) || !(player.getHeldItemMainhand().getItem() instanceof ScytheItem) || player.getCooledAttackStrength(0) != 1F || !(event.getTarget() instanceof LivingEntity)){return;}
+        IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+        if(bonus == null){return;}
+        if(!bonus.getMode() || !SetBonus.hasArmor(player, INSTANCE) || !(player.getHeldItemMainhand().getItem() instanceof ScytheItem) || player.getCooledAttackStrength(0) != 1F || !(event.getTarget() instanceof LivingEntity)){return;}
 
         event.getTarget().attackEntityFrom(DamageSource.OUT_OF_WORLD, ((LivingEntity) event.getTarget()).getMaxHealth()*0.1F);
         event.setCanceled(true);
@@ -239,7 +218,19 @@ public class DeathSet extends SetBonus {
 
     }
 
-    private static void toggleMode(PlayerEntity player){
+    /*@SubscribeEvent
+    public static void onDeath(LivingDeathEvent event){
+        if(!(event.getEntityLiving() instanceof PlayerEntity)){return;}
+        if(event.getEntityLiving().getEntityWorld().isRemote){
+            takeOffTimer=0;
+        }
+    }*/
+    @Override
+    public int getCooldown() {
+        return 36000;
+    }
+
+    /*private static void toggleMode(PlayerEntity player){
         CompoundNBT nbt = player.getPersistentData();
 
         if(!nbt.contains(nbtName)){
@@ -255,9 +246,9 @@ public class DeathSet extends SetBonus {
                 nbt.putBoolean(nbtName, true);
             }
         }
-    }
+    }*/
 
-    public static boolean getMode(PlayerEntity player){
+    /*public static boolean getMode(PlayerEntity player){
         if(!INSTANCE.hasArmor(player)){return false;}
         CompoundNBT nbt = player.getPersistentData();
         if(!nbt.contains(nbtName)){
@@ -266,14 +257,14 @@ public class DeathSet extends SetBonus {
         else{
             return nbt.getBoolean(nbtName);
         }
-    }
+    }*/
 
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ArmorItem){
             if(((ArmorItem) event.getItemStack().getItem()).getArmorMaterial().getName().equals("forbidden_arcanus:mortem")){
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+                event.getToolTip().add(new StringTextComponent("lol1"));
+                event.getToolTip().add(new StringTextComponent("lol2"));
             }
         }
     }

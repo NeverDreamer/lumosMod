@@ -1,24 +1,26 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
+import com.Meli4.lumos.common.core.network.LumosNetwork;
+import com.Meli4.lumos.common.core.network.message.UpdateBonusMessage;
+import com.Meli4.lumos.common.event.BonusCapabilityEvent;
+import com.Meli4.lumos.common.event.SetBonus;
 import com.github.alexthe666.alexsmobs.misc.AMSoundRegistry;
 import com.github.alexthe666.iceandfire.entity.EntityDeathWorm;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
 import com.github.alexthe666.iceandfire.item.ItemDeathwormArmor;
-import com.github.alexthe666.iceandfire.item.ItemSeaSerpentArmor;
-import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
 import com.ma.effects.EffectInit;
-import com.meteor.extrabotany.common.items.armor.miku.ItemMikuArmor;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -26,40 +28,30 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 @Mod.EventBusSubscriber
-public class WormSet extends SetBonus{
-    public String desc1;
-    public String desc2;
+public class WormSet extends SetBonus {
 
     public WormSet(){}
 
-    public WormSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
-    public static WormSet INSTANCE = new WormSet("lol1", "lol2");
 
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
+    private static final WormSet INSTANCE = new WormSet();
 
-            if(itemstack.getItem() instanceof ItemDeathwormArmor){
-                count++;
-            }
-        }
-        return count == 4;
-    }
+    public static SetBonus getInstance(){return INSTANCE;}
+
+    public Class<? extends ArmorItem> getArmorClass(){return ItemDeathwormArmor.class;}
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event){
         if(!(event.getEntityLiving() instanceof PlayerEntity)){ return;}
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-        if(!INSTANCE.hasArmor(player)){return;}
+        IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+        if(bonus==null){return;}
+        if(!SetBonus.hasArmor(player, INSTANCE)){return;}
         if(!WormSet.isSandBelow(player)){return;}
         if(!player.world.getDimensionKey().equals(World.OVERWORLD)){return;}
-        if((player.getPersistentData().getInt("lumosSetBonusCD") > 0)){return;}
+        if(bonus.getCooldown() > 0){return;}
 
         event.setCanceled(true);
         player.setHealth(3);
@@ -87,16 +79,15 @@ public class WormSet extends SetBonus{
         player.world.addEntity(worm1);
         player.world.addEntity(worm2);
 
-        player.getPersistentData().remove("lumosSetBonusCD");
-        player.getPersistentData().putInt("lumosSetBonusCD", 6000);
-
+        bonus.setCooldown(6000);
+        BonusCapabilityEvent.syncEvent(player);
     }
 
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event){
         if(!(event.getEntityLiving() instanceof PlayerEntity)){return;}
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-        if(!INSTANCE.hasArmor(player)){return;}
+        if(!SetBonus.hasArmor(player, INSTANCE)){return;}
 
         DamageSource source = event.getSource();
         if(source.equals(DamageSource.IN_WALL)){
@@ -112,16 +103,12 @@ public class WormSet extends SetBonus{
         return player.world.getBlockState(player.getPosition().down()) == Blocks.SAND.getDefaultState();
     }
 
-    @Override
-    public void doActiveSkill(PlayerEntity player) {
-
-    }
 
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ItemDeathwormArmor){
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+            event.getToolTip().add(new StringTextComponent("lol1"));
+            event.getToolTip().add(new StringTextComponent("lol2"));
         }
     }
 }

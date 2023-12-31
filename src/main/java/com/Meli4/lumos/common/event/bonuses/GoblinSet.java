@@ -1,8 +1,12 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.event.PressSetBonus;
+import com.Meli4.lumos.common.event.SetBonus;
 import com.meteor.extrabotany.common.items.armor.goblinslayer.ItemGoblinSlayerArmor;
+import elucent.eidolon.item.WarlockRobesItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Effects;
@@ -20,34 +24,25 @@ import net.tslat.aoa3.content.entity.mob.overworld.GoblinEntity;
 import java.util.Random;
 
 @Mod.EventBusSubscriber
-public class GoblinSet extends SetBonus{
+public class GoblinSet extends PressSetBonus {
 
-    public static GoblinSet INSTANCE = new GoblinSet("lol1", "lol2");
+    public static GoblinSet INSTANCE = new GoblinSet();
 
     public GoblinSet(){}
-    public GoblinSet(String desc1, String desc2) {
-        super(desc1, desc2);
+
+
+    public static SetBonus getInstance(){return INSTANCE;}
+
+    public Class<? extends ArmorItem> getArmorClass(){return ItemGoblinSlayerArmor.class;}
+
+    @Override
+    public int getCooldown() {
+        return 2000;
     }
 
     @Override
-    public boolean hasArmor(PlayerEntity player){
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
-
-            if(itemstack.getItem() instanceof ItemGoblinSlayerArmor){
-                count++;
-            }
-        }
-        return count == 4;
-    }
-
-    @Override
-    public void doActiveSkill(PlayerEntity player) {
-        CompoundNBT nbt = player.getPersistentData();
-        player.getPersistentData().remove("lumosSetBonus");
-        player.getPersistentData().remove("lumosSetBonusCD");
-        player.getPersistentData().putInt("lumosSetBonus", 400);
-        player.getPersistentData().putInt("lumosSetBonusCD", 2000);
+    public int getDuration() {
+        return 400;
     }
 
     @SubscribeEvent
@@ -56,7 +51,7 @@ public class GoblinSet extends SetBonus{
             PlayerEntity player = (PlayerEntity) event.getEntity();
             //LogManager.getLogger().info((player.getPersistentData().getInt("lumosSetBonus") > 0));
             //LogManager.getLogger().info(new Random().nextFloat());
-            if((player.getPersistentData().getInt("lumosSetBonus") > 0) && INSTANCE.hasArmor(player) && new Random().nextFloat() < 0.25){
+            if((player.getPersistentData().getInt("lumosSetBonus") > 0) && SetBonus.hasArmor(player, INSTANCE) && new Random().nextFloat() < 0.25){
                 event.setCanceled(true);
                 if(((PlayerEntity) event.getEntity()).hurtTime == 20){
                     player.hurtTime = 0;
@@ -70,8 +65,8 @@ public class GoblinSet extends SetBonus{
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ItemGoblinSlayerArmor){
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+            event.getToolTip().add(new StringTextComponent("lol1"));
+            event.getToolTip().add(new StringTextComponent("lol2"));
         }
     }
 
@@ -80,7 +75,7 @@ public class GoblinSet extends SetBonus{
         Entity attacker = event.getSource().getTrueSource();
         Entity entity = event.getEntity();
         if(attacker instanceof PlayerEntity){
-            if(INSTANCE.hasArmor((PlayerEntity) attacker)){
+            if(SetBonus.hasArmor((PlayerEntity) attacker, INSTANCE)){
                 if(entity instanceof GoblinEntity){
                     ((GoblinEntity) entity).setHealth(0);
                     ((GoblinEntity) entity).onDeath(DamageSource.MAGIC);
@@ -94,7 +89,7 @@ public class GoblinSet extends SetBonus{
 
         if(event.getSource().getTrueSource() instanceof PlayerEntity){
             PlayerEntity attacker = (PlayerEntity) event.getSource().getTrueSource();
-            if(INSTANCE.hasArmor((PlayerEntity) attacker)){
+            if(SetBonus.hasArmor((PlayerEntity) attacker, INSTANCE)){
                 if(attacker.getActivePotionEffect(Effects.STRENGTH) != null){
                     event.setAmount(Math.max(0, event.getAmount() - (6*(attacker.getActivePotionEffect(Effects.STRENGTH).getAmplifier()+1))));
                 }

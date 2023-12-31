@@ -1,8 +1,10 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.event.SetBonus;
 import com.github.wolfshotz.wyrmroost.items.base.ArmorMaterials;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -17,44 +19,22 @@ import vectorwing.farmersdelight.registry.ModEffects;
 import java.util.Random;
 
 @Mod.EventBusSubscriber
-public class PlatinumSet extends SetBonus{
-
-    public String desc1;
-    public String desc2;
+public class PlatinumSet extends SetBonus {
 
     public PlatinumSet(){};
 
-    public PlatinumSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
-            if(itemstack.getItem() instanceof ArmorItem){
-                ArmorItem item = (ArmorItem) itemstack.getItem();
-                if(item.getArmorMaterial().equals(ArmorMaterials.PLATINUM)){
-                    count++;
-                }
+    public static PlatinumSet INSTANCE = new PlatinumSet();
 
-            }
-        }
-        return count == 4;
-    }
+    public static SetBonus getInstance(){return INSTANCE;}
 
-    public static PlatinumSet INSTANCE = new PlatinumSet("lol1", "lol2");
-    @Override
-    public void doActiveSkill(PlayerEntity player) {
-
-    }
+    public IArmorMaterial getMaterial(){return ArmorMaterials.PLATINUM;}
 
     @SubscribeEvent
     public static void onTick(TickEvent.PlayerTickEvent event){
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.START)
         {
             PlayerEntity player = event.player;
-            if(INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, INSTANCE)){
                 player.addPotionEffect(new EffectInstance(Effects.LUCK, 10, 4));
                 player.addPotionEffect(new EffectInstance(Effects.STRENGTH, 10, 0));
                 player.addPotionEffect(new EffectInstance(ModEffects.COMFORT.get(), 10, 1));
@@ -82,8 +62,8 @@ public class PlatinumSet extends SetBonus{
         if(event.getItemStack().getItem() instanceof ArmorItem){
             ArmorItem item = (ArmorItem) event.getItemStack().getItem();
             if(item.getArmorMaterial().equals(ArmorMaterials.PLATINUM)){
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+                event.getToolTip().add(new StringTextComponent("lol1"));
+                event.getToolTip().add(new StringTextComponent("lol2"));
             }
 
         }

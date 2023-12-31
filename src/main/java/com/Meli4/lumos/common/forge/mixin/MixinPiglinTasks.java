@@ -1,6 +1,7 @@
 package com.Meli4.lumos.common.forge.mixin;
 
-import com.Meli4.lumos.common.event.RedGeodeSet;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.RedGeodeSet;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
 import net.minecraft.entity.monster.piglin.PiglinEntity;
@@ -26,7 +27,7 @@ public class MixinPiglinTasks {
         Optional<PlayerEntity> optional = p_234524_0_.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
         if(optional.isPresent()){
             PlayerEntity player = optional.get();
-            if(RedGeodeSet.INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, RedGeodeSet.getInstance())){
                 LootTable loottable = p_234524_0_.world.getServer().getLootTableManager().getLootTableFromLocation(LootTables.PIGLIN_BARTERING);
                 List<ItemStack> list = loottable.generate((new LootContext.Builder((ServerWorld)p_234524_0_.world)).withParameter(LootParameters.THIS_ENTITY, p_234524_0_).withRandom(p_234524_0_.world.rand).build(LootParameterSets.BARTER));
                 List<ItemStack> toAdd = new ArrayList<>();
@@ -50,7 +51,7 @@ public class MixinPiglinTasks {
     private static void lumos_piglinAttack(LivingEntity p_234460_0_, CallbackInfoReturnable<Boolean> ci){
         if(p_234460_0_ instanceof PlayerEntity){
             PlayerEntity player = (PlayerEntity) p_234460_0_;
-            if(RedGeodeSet.INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, RedGeodeSet.getInstance())){
                 ci.setReturnValue(true);
             }
         }

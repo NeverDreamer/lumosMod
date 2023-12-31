@@ -1,7 +1,10 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.event.SetBonus;
 import com.github.alexthe666.iceandfire.item.ItemSeaSerpentArmor;
+import com.meteor.extrabotany.common.items.armor.shadowwarrior.ItemShadowWarriorArmor;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -16,44 +19,24 @@ import net.tslat.aoa3.content.item.weapon.sword.CoralstormSword;
 import org.apache.logging.log4j.LogManager;
 
 @Mod.EventBusSubscriber
-public class SeaDefenderSet extends SetBonus{
-    public String desc1;
-    public String desc2;
+public class SeaDefenderSet extends SetBonus {
+
 
     public SeaDefenderSet(){}
 
-    public SeaDefenderSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
-    public static SeaDefenderSet INSTANCE = new SeaDefenderSet("lol1", "lol2");
+    public static SeaDefenderSet INSTANCE = new SeaDefenderSet();
 
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
+    public static SetBonus getInstance(){return INSTANCE;}
 
-            if(itemstack.getItem() instanceof ItemSeaSerpentArmor){
-                count++;
-            }
-        }
-        return count == 4;
-    }
-
-    @Override
-    public void doActiveSkill(PlayerEntity player) {
-
-    }
+    public Class<? extends ArmorItem> getArmorClass(){return ItemSeaSerpentArmor.class;}
 
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event){
         if(event.getSource().getTrueSource() instanceof PlayerEntity){
             PlayerEntity attacker = (PlayerEntity) event.getSource().getTrueSource();
             if(attacker.getHeldItemMainhand().getItem() instanceof CoralstormSword){
-                if(INSTANCE.isPlayerInWater(attacker) && INSTANCE.hasArmor(attacker)){
+                if(INSTANCE.isPlayerInWater(attacker) && SetBonus.hasArmor(attacker, INSTANCE)){
                     event.getSource().setDamageIsAbsolute();
-                    //event.getSource().setDamageIsAbsolute();
-                    LogManager.getLogger().info("true");
                 }
             }
         }
@@ -64,7 +47,7 @@ public class SeaDefenderSet extends SetBonus{
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.START)
         {
             PlayerEntity player = event.player;
-            if(SeaDefenderSet.INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, INSTANCE)){
                 if (!event.player.world.isRemote){
                     if(SeaDefenderSet.INSTANCE.isPlayerInWater(player)){
                         if(player.getPersistentData().contains("rainAmpl")){
@@ -140,8 +123,8 @@ public class SeaDefenderSet extends SetBonus{
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ItemSeaSerpentArmor){
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+            event.getToolTip().add(new StringTextComponent("lol1"));
+            event.getToolTip().add(new StringTextComponent("lol2"));
         }
     }
 }

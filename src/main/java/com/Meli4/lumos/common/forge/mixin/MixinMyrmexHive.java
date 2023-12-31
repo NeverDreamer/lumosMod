@@ -1,6 +1,7 @@
 package com.Meli4.lumos.common.forge.mixin;
 
-import com.Meli4.lumos.common.event.MyrmexSet;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.MyrmexSet;
 import com.github.alexthe666.iceandfire.entity.util.MyrmexHive;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
@@ -22,7 +23,7 @@ public class MixinMyrmexHive {
         if(world != null){
             PlayerEntity player = world.getPlayerByUuid(uuid);
             if(player != null){
-                if (MyrmexSet.INSTANCE.hasArmor(player)) {
+                if (SetBonus.hasArmor(player, MyrmexSet.getInstance())) {
                     cir.setReturnValue(false);
                 }
             }

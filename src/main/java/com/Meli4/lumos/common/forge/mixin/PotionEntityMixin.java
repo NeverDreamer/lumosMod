@@ -1,18 +1,14 @@
 package com.Meli4.lumos.common.forge.mixin;
 
-import com.Meli4.lumos.common.event.PurpleGeodeSet;
-import com.Meli4.lumos.common.potions.ModPotions;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.PurpleGeodeSet;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,7 +27,7 @@ public class PotionEntityMixin {
             for(LivingEntity livingentity : list) {
                 double d0 = ((PotionEntity)(Object)this).getDistance(livingentity);
                 if (d0 < 16.0D && livingentity instanceof PlayerEntity) {
-                    if(PurpleGeodeSet.INSTANCE.hasArmor(((PlayerEntity)livingentity))){
+                    if(SetBonus.hasArmor(((PlayerEntity)livingentity), PurpleGeodeSet.getInstance())){
                         int i = 0;
                         for(ItemStack stack: livingentity.getArmorInventoryList()){
                             if(i==0){

@@ -1,19 +1,16 @@
 package com.Meli4.lumos.common.potions;
 
-import com.Meli4.lumos.common.event.DeathSet;
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.DeathSet;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.EffectType;
 import net.minecraft.util.DamageSource;
-import org.apache.logging.log4j.LogManager;
-
-import java.util.Map;
 
 public class SoulWitheringEffect extends Effect {
     protected SoulWitheringEffect() {super(EffectType.HARMFUL, 000000);}
@@ -70,7 +67,9 @@ public class SoulWitheringEffect extends Effect {
         super.removeAttributesModifiersFromEntity(entityLivingBaseIn, attributeMapIn, amplifier);
         if(!(entityLivingBaseIn instanceof PlayerEntity)){return;}
         PlayerEntity player = (PlayerEntity) entityLivingBaseIn;
-        if(!DeathSet.INSTANCE.hasArmor(player) || !DeathSet.getMode(player) || (player.getActivePotionEffect(ModPotions.SOUL_WITHERING.get()).getDuration()+1)%40==0){return;}
+        IBonus bonus = (IBonus) BonusCapability.getBonus(player).orElse((IBonus) null);
+        if(bonus==null){return;}
+        if(!SetBonus.hasArmor(player, DeathSet.INSTANCE) || !bonus.getMode() || (player.getActivePotionEffect(ModPotions.SOUL_WITHERING.get()).getDuration()+1)%40==0){return;}
         player.setHealth(0);
         player.onDeath(DamageSource.OUT_OF_WORLD);
     }

@@ -2,6 +2,7 @@ package com.Meli4.lumos.common.core.network;
 
 import com.Meli4.lumos.LumosMod;
 import com.Meli4.lumos.common.core.network.message.InputMessage;
+import com.Meli4.lumos.common.core.network.message.UpdateBonusMessage;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -15,5 +16,6 @@ public class LumosNetwork {
             version -> version.equals(NETWORK_VERSION), version -> version.equals(NETWORK_VERSION));
     public static void init(){
         CHANNEL.registerMessage(0, InputMessage.class, InputMessage::encode, InputMessage::decode, InputMessage::handle);
+        CHANNEL.registerMessage(1, UpdateBonusMessage.class, UpdateBonusMessage::encode, UpdateBonusMessage::decode, UpdateBonusMessage::handle);
     }
 }

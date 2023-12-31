@@ -30,6 +30,7 @@ public class DeathMarkEffect extends Effect {
         return true;
     }
 
+    // you're right, Mahito, I'm you
     @Override
     public void performEffect(LivingEntity entity, int p_76394_2_) {
         super.performEffect(entity, p_76394_2_);

@@ -1,19 +1,20 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
-import com.Meli4.lumos.common.core.network.message.InputMessage;
+import com.Meli4.lumos.common.event.PressSetBonus;
+import com.Meli4.lumos.common.event.SetBonus;
 import com.Meli4.lumos.common.potions.ModPotions;
 import com.github.klikli_dev.occultism.registry.OccultismEffects;
 import com.github.wolfshotz.wyrmroost.items.base.ArmorMaterials;
 import com.hollingsworth.arsnouveau.common.ritual.ScryingRitual;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.*;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -26,45 +27,21 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.PacketDistributor;
-import org.apache.logging.log4j.LogManager;
 
-import java.util.Map;
 import java.util.UUID;
 
-import static com.Meli4.lumos.common.core.network.LumosNetwork.CHANNEL;
-
 @Mod.EventBusSubscriber
-public class PurpleGeodeSet extends SetBonus{
-
-    public String desc1;
-    public String desc2;
+public class PurpleGeodeSet extends PressSetBonus {
 
     public PurpleGeodeSet(){};
 
-    public PurpleGeodeSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
+    public static PurpleGeodeSet INSTANCE = new PurpleGeodeSet();
 
-    public static PurpleGeodeSet INSTANCE = new PurpleGeodeSet("lol1", "lol2");
+    private static final String uuid = "9ae3d87a-497d-47a3-b9b9-99e555d2920e";
 
-    private static String uuid = "9ae3d87a-497d-47a3-b9b9-99e555d2920e";
+    public static SetBonus getInstance(){return INSTANCE;}
 
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
-            if(itemstack.getItem() instanceof ArmorItem){
-                ArmorItem item = (ArmorItem) itemstack.getItem();
-                if(item.getArmorMaterial().equals(ArmorMaterials.PURPLE_GEODE)){
-                    count++;
-                }
-
-            }
-        }
-        return count == 4;
-    }
+    public IArmorMaterial getMaterial(){return ArmorMaterials.PURPLE_GEODE;}
 
     @SubscribeEvent
     public static void onAggro(LivingSetAttackTargetEvent event){
@@ -74,7 +51,7 @@ public class PurpleGeodeSet extends SetBonus{
 
         PlayerEntity player = (PlayerEntity) event.getTarget();
         if (!player.world.isRemote){
-            if(INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, INSTANCE)){
                 ((EndermanEntity) event.getEntityLiving()).setAttackTarget(null);
             }
         }
@@ -88,7 +65,7 @@ public class PurpleGeodeSet extends SetBonus{
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.START && !event.player.world.isRemote)
         {
             PlayerEntity player = event.player;
-            if(INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, INSTANCE)){
                 if(player.world.getDimensionKey().equals(World.THE_END)){
                     player.addPotionEffect(new EffectInstance(Effects.SLOW_FALLING, 10, 1));
                     player.addPotionEffect(new EffectInstance(Effects.JUMP_BOOST, 10, 3));
@@ -156,10 +133,19 @@ public class PurpleGeodeSet extends SetBonus{
     }
 
     @Override
-    public void doActiveSkill(PlayerEntity player) {
+    public int getCooldown() {
+        return 6100;
+    }
+
+    @Override
+    public int getDuration() {
+        return 0;
+    }
+
+    @Override
+    public void onPress(PlayerEntity player){
+        super.onPress(player);
         player.addPotionEffect(new EffectInstance(ModPotions.CRYSTALLIZED.get(), 100, 0));
-        player.getPersistentData().remove("lumosSetBonusCD");
-        player.getPersistentData().putInt("lumosSetBonusCD", 6100);
     }
 
     @SubscribeEvent
@@ -167,8 +153,8 @@ public class PurpleGeodeSet extends SetBonus{
         if(event.getItemStack().getItem() instanceof ArmorItem){
             ArmorItem item = (ArmorItem) event.getItemStack().getItem();
             if(item.getArmorMaterial().equals(ArmorMaterials.PURPLE_GEODE)){
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+                event.getToolTip().add(new StringTextComponent("lol1"));
+                event.getToolTip().add(new StringTextComponent("lol2"));
             }
 
         }

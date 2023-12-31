@@ -1,16 +1,17 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
+import com.Meli4.lumos.common.event.PressSetBonus;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.github.alexthe666.iceandfire.item.ItemSeaSerpentArmor;
 import com.github.wolfshotz.wyrmroost.items.base.ArmorMaterials;
-import com.hollingsworth.arsnouveau.api.ArsNouveauAPI;
 import com.hollingsworth.arsnouveau.api.util.DropDistribution;
 import com.hollingsworth.arsnouveau.client.ClientInfo;
 import com.hollingsworth.arsnouveau.client.particle.GlowParticleData;
 import com.hollingsworth.arsnouveau.client.particle.ParticleColor;
 import com.hollingsworth.arsnouveau.client.particle.ParticleUtil;
-import com.hollingsworth.arsnouveau.common.network.Networking;
-import com.hollingsworth.arsnouveau.common.network.PacketGetPersistentData;
 import com.hollingsworth.arsnouveau.common.potions.ModPotions;
-import com.hollingsworth.arsnouveau.common.potions.ScryingEffect;
 import com.hollingsworth.arsnouveau.common.ritual.ScryingRitual;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
@@ -18,64 +19,39 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.network.PacketDistributor;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
-public class RedGeodeSet extends SetBonus{
-
-    public String desc1;
-    public String desc2;
+public class RedGeodeSet extends PressSetBonus {
 
     public RedGeodeSet(){};
 
-    public RedGeodeSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
-
-    public static RedGeodeSet INSTANCE = new RedGeodeSet("lol1", "lol2");
+    public static RedGeodeSet INSTANCE = new RedGeodeSet();
 
     public static List<BlockPos> scryingPositions = new ArrayList();
 
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
-            if(itemstack.getItem() instanceof ArmorItem){
-                ArmorItem item = (ArmorItem) itemstack.getItem();
-                if(item.getArmorMaterial().equals(ArmorMaterials.RED_GEODE)){
-                    count++;
-                }
 
-            }
-        }
-        return count == 4;
-    }
+    public static SetBonus getInstance(){return INSTANCE;}
+
+    public IArmorMaterial getMaterial(){return ArmorMaterials.RED_GEODE;}
 
 /*    @SubscribeEvent
     public static void playerLoginEvent(final PlayerEvent.PlayerLoggedInEvent event) {
@@ -87,7 +63,7 @@ public class RedGeodeSet extends SetBonus{
 
     @SubscribeEvent
     public static void playerTickEvent(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
-       if (event.side == LogicalSide.CLIENT && event.phase == TickEvent.Phase.END && INSTANCE.hasArmor(event.player) && ClientInfo.ticksInGame % 30 == 0) {
+       if (event.side == LogicalSide.CLIENT && event.phase == TickEvent.Phase.END && SetBonus.hasArmor(event.player, INSTANCE) && ClientInfo.ticksInGame % 30 == 0) {
 
             List<BlockPos> scryingPos = new ArrayList<>();
             CompoundNBT tag = ClientInfo.persistentData;
@@ -112,7 +88,7 @@ public class RedGeodeSet extends SetBonus{
         }
         if(event.side.isServer()){
             PlayerEntity player = event.player;
-            if(INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, INSTANCE)){
                 player.addPotionEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 10, 0));
             }
 
@@ -153,11 +129,20 @@ public class RedGeodeSet extends SetBonus{
     }
 
     @Override
-    public void doActiveSkill(PlayerEntity player) {
+    public int getCooldown() {
+        return 7200;
+    }
+
+    @Override
+    public int getDuration() {
+        return 0;
+    }
+
+    @Override
+    public void onPress(PlayerEntity player){
+        super.onPress(player);
         ScryingRitual.grantScrying((ServerPlayerEntity)player, new ItemStack(Blocks.NETHER_GOLD_ORE), 1200);
         ScryingRitual.grantScrying((ServerPlayerEntity)player, new ItemStack(Blocks.ANCIENT_DEBRIS), 1200);
-        player.getPersistentData().remove("lumosSetBonusCD");
-        player.getPersistentData().putInt("lumosSetBonusCD", 7200);
     }
 
     @SubscribeEvent
@@ -165,8 +150,8 @@ public class RedGeodeSet extends SetBonus{
         if(event.getItemStack().getItem() instanceof ArmorItem){
             ArmorItem item = (ArmorItem) event.getItemStack().getItem();
             if(item.getArmorMaterial().equals(ArmorMaterials.RED_GEODE)){
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-                event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+                event.getToolTip().add(new StringTextComponent("lol1"));
+                event.getToolTip().add(new StringTextComponent("lol2"));
             }
 
         }

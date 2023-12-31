@@ -2,14 +2,21 @@ package com.Meli4.lumos;
 
 import com.Meli4.lumos.common.block.BlockLightSource;
 import com.Meli4.lumos.common.block.ModBlocks;
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
 import com.Meli4.lumos.common.core.init.KeybindsInit;
 import com.Meli4.lumos.common.core.network.LumosNetwork;
+import com.Meli4.lumos.common.event.BonusCapabilityEvent;
 import com.Meli4.lumos.common.potions.ModPotions;
 import com.Meli4.lumos.common.tileentity.TileEntityInit;
+import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
@@ -58,6 +65,7 @@ public class LumosMod
     private void setup(final FMLCommonSetupEvent event)
     {
         // some preinit code
+        BonusCapability.register();
         LumosNetwork.init();
     }
 
@@ -69,7 +77,6 @@ public class LumosMod
     private void enqueueIMC(final InterModEnqueueEvent event)
     {
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("examplemod", "helloworld", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
     }
 
     private void processIMC(final InterModProcessEvent event)
@@ -83,18 +90,30 @@ public class LumosMod
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         // do something when the server starts
-        LOGGER.info("HELLO from server starting");
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
     // Event bus for receiving Registry Events)
-    @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
+    @Mod.EventBusSubscriber
     public static class RegistryEvents {
         @SubscribeEvent
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
 /*           blockRegistryEvent.getRegistry().register(new BlockLightSource(AbstractBlock.Properties.create(Material.AIR).doesNotBlockMovement().setAir().setLightLevel((state) -> {
                 return 15;
             })));*/
+        }
+        @SubscribeEvent
+        public static void onRegisterCommandEvent(RegisterCommandsEvent event) {
+            CommandDispatcher<CommandSource> commandDispatcher = event.getDispatcher();
+            commandDispatcher.register(Commands.literal("removeCooldown")
+                    .requires((commandSource) -> commandSource.hasPermissionLevel(2))
+                    .executes(
+                    (commandSource) -> {
+                        IBonus bonus = (IBonus) BonusCapability.getBonus(commandSource.getSource().asPlayer()).orElse((IBonus) null);
+                        bonus.setCooldown(0);
+                        BonusCapabilityEvent.syncEvent(commandSource.getSource().asPlayer());
+                        return 0;
+                    }));
         }
     }
 }

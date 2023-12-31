@@ -1,14 +1,13 @@
 package com.Meli4.lumos.common.tileentity;
 
-import com.Meli4.lumos.common.event.BlueGeodeSet;
-import net.minecraft.block.Blocks;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.BlueGeodeSet;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MutableBoundingBox;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class BlockLightSourceTile extends TileEntity implements ITickableTileEnt
         else {
             boolean has = false;
             for (PlayerEntity player : players){
-                if (BlueGeodeSet.INSTANCE.hasArmor(player)){
+                if (SetBonus.hasArmor(player, BlueGeodeSet.INSTANCE)){
                     has = true;
                     break;
                 }

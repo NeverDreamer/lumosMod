@@ -1,6 +1,7 @@
 package com.Meli4.lumos.common.forge.mixin;
 
-import com.Meli4.lumos.common.event.StarIdolSet;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.StarIdolSet;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +18,7 @@ public class MixinManaItemHandlerImpl {
     @Inject(at=@At("HEAD"), method = "requestManaExact", remap = false, cancellable = true)
     public void lumos_OnRequestManaExact(ItemStack stack, PlayerEntity player, int manaToGet, boolean remove, CallbackInfoReturnable<Boolean> ci){
         if((stack.getItem() instanceof IManaUsingItem) && (stack.getItem() instanceof ItemBauble)){
-            if(StarIdolSet.INSTANCE.hasArmor(player)){
+            if(SetBonus.hasArmor(player, StarIdolSet.getInstance())){
                 ci.setReturnValue(true);
             }
         }

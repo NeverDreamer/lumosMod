@@ -1,16 +1,15 @@
-package com.Meli4.lumos.common.event;
+package com.Meli4.lumos.common.event.bonuses;
 
+import com.Meli4.lumos.common.event.SetBonus;
 import com.github.alexthe666.iceandfire.item.ItemDeathwormArmor;
 import com.github.alexthe666.iceandfire.item.ItemTrollArmor;
-import com.meteor.extrabotany.common.items.armor.miku.ItemMikuArmor;
 import com.sammy.malum.core.init.MalumSounds;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -18,38 +17,23 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Random;
-import java.util.Set;
+
 @Mod.EventBusSubscriber
 public class TrollSet extends SetBonus {
-    public String desc1;
-    public String desc2;
 
     public TrollSet(){}
 
-    public TrollSet(String desc1, String desc2){
-        this.desc1 = desc1;
-        this.desc2 = desc2;
-    }
-    public static TrollSet INSTANCE = new TrollSet("lol1", "lol2");
+    private static final TrollSet INSTANCE = new TrollSet();
 
-    @Override
-    public boolean hasArmor(PlayerEntity player) {
-        int count = 0;
-        for(ItemStack itemstack : player.getArmorInventoryList()){
+    public static SetBonus getInstance(){return INSTANCE;}
 
-            if(itemstack.getItem() instanceof ItemTrollArmor){
-                count++;
-            }
-        }
-        return count == 4;
-    }
-
+    public Class<? extends ArmorItem> getArmorClass(){return ItemTrollArmor.class;}
     @SubscribeEvent
     public static void onDamaged(LivingHurtEvent event){
 
         if(event.getEntityLiving() instanceof PlayerEntity){
             PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-            if(INSTANCE.hasArmor(player) && event.getSource().isProjectile()){
+            if(SetBonus.hasArmor(player, INSTANCE) && event.getSource().isProjectile()){
                 if(new Random().nextFloat() <= 0.3){
                     event.setCanceled(true);
                     if(event.getSource().getTrueSource() != null){
@@ -67,16 +51,11 @@ public class TrollSet extends SetBonus {
         }
     }
 
-    @Override
-    public void doActiveSkill(PlayerEntity player) {
-
-    }
-
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ItemTrollArmor){
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc1));
-            event.getToolTip().add(new StringTextComponent(INSTANCE.desc2));
+            event.getToolTip().add(new StringTextComponent("lol1"));
+            event.getToolTip().add(new StringTextComponent("lol2"));
         }
     }
 }

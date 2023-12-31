@@ -1,10 +1,12 @@
 package com.Meli4.lumos.common.forge.mixin;
 
-import com.Meli4.lumos.common.event.DeathSet;
+import com.Meli4.lumos.common.capability.BonusCapability;
+import com.Meli4.lumos.common.capability.IBonus;
+import com.Meli4.lumos.common.event.SetBonus;
+import com.Meli4.lumos.common.event.bonuses.DeathSet;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,14 +27,21 @@ public abstract class MixinSlot {
         }
         if(flag){
             if(playerIn.world.isRemote){
-                if(DeathSet.INSTANCE.hasArmor(playerIn) && DeathSet.takeOffTimer > 0){
-                    cir.setReturnValue(false);
+                IBonus bonus = (IBonus) BonusCapability.getBonus(playerIn).orElse((IBonus) null);
+                if(bonus!=null){
+                    if(SetBonus.hasArmor(playerIn, DeathSet.INSTANCE) && (bonus.getCooldown()-24000)>0){
+                        cir.setReturnValue(false);
+                    }
                 }
+
             }
             else{
-                if(DeathSet.INSTANCE.hasArmor(playerIn) && playerIn.getPersistentData().contains("lumosSetBonus")){
-                    if(playerIn.getPersistentData().getInt("lumosSetBonus") > 0){
-                        cir.setReturnValue(false);
+                if(SetBonus.hasArmor(playerIn, DeathSet.INSTANCE)){
+                    IBonus bonus = (IBonus) BonusCapability.getBonus(playerIn).orElse((IBonus) null);
+                    if(bonus!=null){
+                        if((bonus.getCooldown()-24000)>0){
+                            cir.setReturnValue(false);
+                        }
                     }
                 }
             }
