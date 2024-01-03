@@ -26,7 +26,7 @@ public class StarIdolSet extends SetBonus {
 
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
-        if(event.getItemStack().getItem() instanceof ItemMikuArmor){
+        if(event.getItemStack().getItem().getClass().equals(INSTANCE.getArmorClass())){
             event.getToolTip().add(new StringTextComponent("lol1"));
             event.getToolTip().add(new StringTextComponent("lol2"));
         }

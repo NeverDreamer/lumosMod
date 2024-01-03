@@ -57,24 +57,6 @@ public class GlacerytheSet extends ToggleSetBonus {
         }
     }
 
-
-//    @SubscribeEvent
-//        public static void onTick(TickEvent.PlayerTickEvent event){
-//
-//            if (event.phase == net.minecraftforge.event.TickEvent.Phase.START)
-//            {
-//                PlayerEntity player = event.player;
-//                if(INSTANCE.hasArmor(player)){
-//                    if (!event.player.world.isRemote)
-//                    {
-//                        player.addPotionEffect(new EffectInstance(Effects.HUNGER, 10, 0));
-//                    }
-//
-//                }
-//            }
-//        }
-
-
     @SubscribeEvent
     public static void modifyToolTip(ItemTooltipEvent event){
         if(event.getItemStack().getItem() instanceof ArmorItem){
