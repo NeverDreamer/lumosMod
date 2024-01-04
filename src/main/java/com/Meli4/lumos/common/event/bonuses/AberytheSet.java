@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -17,6 +18,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -68,13 +70,22 @@ public class AberytheSet extends SetBonus {
             if(arrow.getPersistentData().getBoolean("shouldInflictSomniumDamage")){
                 if(entity.hurtResistantTime == 20){
                     entity.hurtResistantTime = 0;
-                    entity.attackEntityFrom(DamageSource.MAGIC, 4);
+                    entity.attackEntityFrom(DamageSource.MAGIC, 5);
                 }
             }
-            entity.addPotionEffect(new EffectInstance(ModPotions.HEX_EFFECT, 100, 3));
-            entity.addPotionEffect(new EffectInstance(Effects.WITHER, 60, 1));
+            entity.addPotionEffect(new EffectInstance(ModPotions.HEX_EFFECT, 240, 3));
+            entity.addPotionEffect(new EffectInstance(Effects.WITHER, 140, 1));
         }
 
+    }
+
+    @SubscribeEvent
+    public static void onTick(LivingEntityUseItemEvent.Tick event){
+        if(!(event.getEntity() instanceof PlayerEntity)){return;}
+        PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+        if(!SetBonus.hasArmor(player, INSTANCE) || !(player.getHeldItemMainhand().getItem() instanceof BowItem) || !(player.getHeldItemMainhand().getItem() instanceof CrossbowItem)){return;}
+        if((event.getDuration()%6)==0){event.setDuration(event.getDuration()-1);}
+        //17% increase in draw speed
     }
 
     @SubscribeEvent

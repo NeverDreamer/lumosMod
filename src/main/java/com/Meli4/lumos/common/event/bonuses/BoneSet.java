@@ -87,7 +87,7 @@ public class BoneSet extends SetBonus {
 
     @SubscribeEvent
     public static void onTick(LivingEntityUseItemEvent.Tick event){
-        if(!(event.getEntity() instanceof ServerPlayerEntity)){return;}
+        if(!(event.getEntity() instanceof PlayerEntity)){return;}
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
         if(!SetBonus.hasArmor(player, INSTANCE) || !(player.getHeldItemMainhand().getItem() instanceof BowItem)){return;}
         if((event.getDuration()%3)==0){event.setDuration(event.getDuration()-1);}

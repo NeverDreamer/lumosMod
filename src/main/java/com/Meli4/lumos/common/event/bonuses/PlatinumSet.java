@@ -36,7 +36,6 @@ public class PlatinumSet extends SetBonus {
             PlayerEntity player = event.player;
             if(SetBonus.hasArmor(player, INSTANCE)){
                 player.addPotionEffect(new EffectInstance(Effects.LUCK, 10, 4));
-                player.addPotionEffect(new EffectInstance(Effects.STRENGTH, 10, 0));
                 player.addPotionEffect(new EffectInstance(ModEffects.COMFORT.get(), 10, 1));
                 if(player.isInWater()){
                     player.setMotion(player.getMotion().x, -1, player.getMotion().z);
